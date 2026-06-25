@@ -114,6 +114,12 @@
     border: 0;
     display: block;
   }
+  /* Fix _repr_html_() wrappers */
+  #map-status > div, #map-network > div, #map-coverage > div,
+  #map-status > div > div, #map-network > div > div, #map-coverage > div > div {
+    height: 100% !important;
+    padding-bottom: 0 !important;
+  }
   /* Ensure leaflet controls appear above sidebar */
   .leaflet-top, .leaflet-bottom { z-index: 400 !important; }
 
@@ -499,6 +505,47 @@
     {% endif %}
     {% endif %}
 
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- STANDARD MODE — Masalah Koordinat (Moved to right column)   -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    {% if selected_mode != "coverage" and coord_issues %}
+    <div class="glass-card rounded-2xl overflow-hidden mt-5">
+      <div class="px-5 py-4 flex items-center gap-2 border-b border-amber-100/60">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:rgba(251,191,36,0.15);">
+          <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+          </svg>
+        </div>
+        <h3 class="text-sm font-semibold text-slate-700">Masalah Koordinat</h3>
+        <span class="ml-1 issue-badge">{{ coord_issues|length }} lokasi</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-slate-100">
+              <th class="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Store Code</th>
+              <th class="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Nama Bisnis</th>
+              <th class="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Alamat</th>
+              <th class="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Status Masalah</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            {% for s in coord_issues %}
+            <tr class="hover:bg-violet-50/30 transition-colors">
+              <td class="px-5 py-3 font-mono text-xs text-slate-400">{{ s.store_code|default:"—" }}</td>
+              <td class="px-5 py-3 font-medium text-slate-700">{{ s.business_name|default:"—" }}</td>
+              <td class="px-5 py-3 text-xs text-slate-500">{{ s.address|default:"—"|truncatechars:60 }}</td>
+              <td class="px-5 py-3">
+                <span class="issue-badge">{{ s.coord_status|default:"UNKNOWN" }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
   </div>
 </div>
 
@@ -728,46 +775,7 @@
 </div>
 {% endif %}
 
-<!-- ═══════════════════════════════════════════════════════════ -->
-<!-- STANDARD MODE — Masalah Koordinat (full width, di bawah)  -->
-<!-- ═══════════════════════════════════════════════════════════ -->
-{% if selected_mode != "coverage" and coord_issues %}
-<div class="glass-card rounded-2xl overflow-hidden mt-5">
-  <div class="px-5 py-4 flex items-center gap-2 border-b border-amber-100/60">
-    <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:rgba(251,191,36,0.15);">
-      <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
-      </svg>
-    </div>
-    <h3 class="text-sm font-semibold text-slate-700">Masalah Koordinat</h3>
-    <span class="ml-1 issue-badge">{{ coord_issues|length }} lokasi</span>
-  </div>
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm">
-      <thead>
-        <tr class="border-b border-slate-100">
-          <th class="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Store Code</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Nama Bisnis</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Alamat</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Status Masalah</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-50">
-        {% for s in coord_issues %}
-        <tr class="hover:bg-violet-50/30 transition-colors">
-          <td class="px-5 py-3 font-mono text-xs text-slate-400">{{ s.store_code|default:"—" }}</td>
-          <td class="px-5 py-3 font-medium text-slate-700">{{ s.business_name|default:"—" }}</td>
-          <td class="px-5 py-3 text-xs text-slate-500">{{ s.address|default:"—"|truncatechars:60 }}</td>
-          <td class="px-5 py-3">
-            <span class="issue-badge">{{ s.coord_status|default:"UNKNOWN" }}</span>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-{% endif %}
+
 
 
 <script>

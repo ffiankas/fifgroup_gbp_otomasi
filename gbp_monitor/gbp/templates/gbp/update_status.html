@@ -2,24 +2,24 @@
 {% block title %}Update Status Verifikasi{% endblock %}
 
 {% block breadcrumb %}
-<span class="text-slate-500">Dashboard</span>
-<span class="text-slate-300 mx-1">/</span>
-<span class="text-slate-700 font-medium">Update Status Verifikasi</span>
+<span class="text-[#8C8AA0] text-sm">Dashboard</span>
+<span class="text-[#8C8AA0] mx-2 text-sm">/</span>
+<span class="text-[#1F1B3F] font-medium text-sm">Update Status Verifikasi</span>
 {% endblock %}
 
 {% block content %}
 
 <!-- ── Page Header ─────────────────────────────────────── -->
 <div class="mb-6">
-  <h1 class="text-3xl font-display font-bold text-slate-900 tracking-tight">Update Status Verifikasi GBP</h1>
-  <p class="mt-1 text-sm text-slate-500">
+  <h1 class="text-2xl font-display font-bold text-[#1F1B3F] tracking-tight">Update Status Verifikasi GBP</h1>
+  <p class="mt-1 text-sm text-[#8C8AA0]">
     Bandingkan status verifikasi master dengan data terbaru dari Google Business Profile API,
     lalu update hanya baris yang berubah.
   </p>
 </div>
 
 <!-- ── Info Banner ─────────────────────────────────────── -->
-<div class="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-blue-50 border border-blue-100 text-blue-800 text-sm mb-6">
+<div class="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-[#F4F3FB] border border-indigo-100 text-[#6C5DD3] text-sm mb-6">
   <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
     <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
   </svg>
@@ -30,7 +30,7 @@
 </div>
 
 <!-- ── Form ────────────────────────────────────────────── -->
-<div class="bg-white rounded-2xl border border-gray-200 shadow-card p-6 mb-6">
+<div class="form-card mb-6">
   <form method="POST" enctype="multipart/form-data" id="update-form">
     {% csrf_token %}
 
@@ -38,28 +38,28 @@
 
       <!-- Sumber Master -->
       <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-slate-700 mb-2">Sumber Master Data</label>
+        <label class="block text-sm font-medium text-[#1F1B3F] mb-2">Sumber Master Data</label>
         <div class="flex gap-3" id="source-type-group">
           <label id="label-csv" class="flex items-center gap-2.5 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all flex-1
-                 {% if not form.source_type.value or form.source_type.value == 'csv' %}border-primary bg-primary-50{% else %}border-gray-200 hover:border-gray-300{% endif %}">
+                 {% if not form.source_type.value or form.source_type.value == 'csv' %}border-[#6C5DD3] bg-[#F4F3FB]{% else %}border-gray-200 hover:border-indigo-200{% endif %}">
             <input type="radio" name="source_type" value="csv"
                    {% if not form.source_type.value or form.source_type.value == 'csv' %}checked{% endif %}
                    onchange="toggleSourceType(this.value)"
                    class="accent-primary">
             <div>
-              <div class="text-sm font-semibold text-slate-700">📄 CSV File</div>
-              <div class="text-xs text-slate-400">Upload atau path ke file CSV</div>
+              <div class="text-sm font-semibold text-[#1F1B3F]">📄 CSV File</div>
+              <div class="text-xs text-[#8C8AA0]">Upload atau path ke file CSV</div>
             </div>
           </label>
           <label id="label-sqlite" class="flex items-center gap-2.5 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all flex-1
-                 {% if form.source_type.value == 'sqlite' %}border-primary bg-primary-50{% else %}border-gray-200 hover:border-gray-300{% endif %}">
+                 {% if form.source_type.value == 'sqlite' %}border-[#6C5DD3] bg-[#F4F3FB]{% else %}border-gray-200 hover:border-indigo-200{% endif %}">
             <input type="radio" name="source_type" value="sqlite"
                    {% if form.source_type.value == 'sqlite' %}checked{% endif %}
                    onchange="toggleSourceType(this.value)"
                    class="accent-primary">
             <div>
-              <div class="text-sm font-semibold text-slate-700">🗄️ SQLite DB</div>
-              <div class="text-xs text-slate-400">Koneksi ke file database SQLite</div>
+              <div class="text-sm font-semibold text-[#1F1B3F]">🗄️ SQLite DB</div>
+              <div class="text-xs text-[#8C8AA0]">Koneksi ke file database SQLite</div>
             </div>
           </label>
         </div>
@@ -67,15 +67,15 @@
 
       <!-- Upload CSV -->
       <div id="csv-upload-group">
-        <label class="block text-sm font-medium text-slate-700 mb-2">Upload File Master CSV</label>
+        <label class="block text-sm font-medium text-[#1F1B3F] mb-2">Upload File Master CSV</label>
         <div id="file-drop-area"
-              class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer
-                     hover:border-primary hover:bg-primary-50/30 transition-all group">
-          <svg class="w-8 h-8 text-slate-300 group-hover:text-primary mx-auto mb-2 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              class="border-2 border-dashed border-[rgba(108,93,211,0.2)] rounded-xl p-6 text-center cursor-pointer
+                     hover:border-[#6C5DD3] hover:bg-[#F4F3FB]/50 transition-all group">
+          <svg class="w-8 h-8 text-[#8C8AA0] group-hover:text-[#6C5DD3] mx-auto mb-2 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
           </svg>
-          <p class="text-sm text-slate-500 group-hover:text-slate-700">Drag & drop atau klik untuk pilih file</p>
-          <p class="text-xs text-slate-400 mt-1" id="file-name-display">Format: .csv</p>
+          <p class="text-sm text-[#8C8AA0] group-hover:text-[#1F1B3F]">Drag & drop atau klik untuk pilih file</p>
+          <p class="text-xs text-[#8C8AA0] mt-1" id="file-name-display">Format: .csv</p>
           <input type="file" name="master_file" accept=".csv" id="master-file-input"
                  class="hidden" onchange="showFileName(this)">
         </div>
@@ -83,9 +83,9 @@
 
       <!-- Path Master -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-2" for="master-path-input">
+        <label class="block text-sm font-medium text-[#1F1B3F] mb-2" for="master-path-input">
           Path File Master
-          <span class="text-slate-400 font-normal">(opsional jika upload)</span>
+          <span class="text-[#8C8AA0] font-normal">(opsional jika upload)</span>
         </label>
         <input type="text" name="master_path" id="master-path-input"
                value="{{ form.master_path.value|default:'' }}"
@@ -97,21 +97,21 @@
 
       <!-- SQLite Table (tersembunyi jika CSV) -->
       <div id="sqlite-table-group" class="hidden">
-        <label class="block text-sm font-medium text-slate-700 mb-2" for="sqlite-table-input">
+        <label class="block text-sm font-medium text-[#1F1B3F] mb-2" for="sqlite-table-input">
           Nama Tabel SQLite
         </label>
         <input type="text" name="sqlite_table" id="sqlite-table-input"
                value="{{ form.sqlite_table.value|default:'kios' }}"
                placeholder="kios"
-                class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-white
-                       focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary transition-all">
+               class="w-full px-3.5 py-2.5 text-sm border border-[rgba(108,93,211,0.2)] rounded-xl bg-white
+                      focus:outline-none focus:ring-2 focus:ring-[rgba(108,93,211,0.15)] focus:border-[#6C5DD3] transition-all">
       </div>
 
       <!-- Account ID -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-2" for="account-id-input">
+        <label class="block text-sm font-medium text-[#1F1B3F] mb-2" for="account-id-input">
           Account ID GBP
-          <span class="text-slate-400 font-normal">(kosongkan untuk semua akun)</span>
+          <span class="text-[#8C8AA0] font-normal">(kosongkan untuk semua akun)</span>
         </label>
         <input type="text" name="account_id" id="account-id-input"
                value="{{ form.account_id.value|default:'' }}"
@@ -128,14 +128,14 @@
             <input type="checkbox" name="save_to_disk" id="save-to-disk-checkbox"
                    {% if form.save_to_disk.value %}checked{% endif %}
                    class="sr-only peer">
-            <div class="w-10 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-primary-100 rounded-full peer
-                        peer-checked:bg-primary transition-all"></div>
+            <div class="w-10 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-[rgba(108,93,211,0.2)] rounded-full peer
+                        peer-checked:bg-[#6C5DD3] transition-all"></div>
             <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all
                         peer-checked:translate-x-4 shadow-sm"></div>
           </div>
           <div>
-            <div class="text-sm font-medium text-slate-700">Simpan perubahan ke file master di disk</div>
-            <div class="text-xs text-slate-400">Memerlukan path file CSV yang valid</div>
+            <div class="text-sm font-medium text-[#1F1B3F]">Simpan perubahan ke file master di disk</div>
+            <div class="text-xs text-[#8C8AA0]">Memerlukan path file CSV yang valid</div>
           </div>
         </label>
       </div>
@@ -155,13 +155,13 @@
 
     <div class="mt-6 flex items-center gap-4">
       <button type="submit" id="btn-submit-update"
-              class="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary-700 shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">
+              class="btn-primary px-6 py-2.5 hover:-translate-y-0.5 active:scale-95">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
         Ambil Data Terbaru & Bandingkan
       </button>
-      <span class="text-xs text-slate-400">Proses akan mengambil data langsung dari GBP API</span>
+      <span class="text-xs text-[#8C8AA0]">Proses akan mengambil data langsung dari GBP API</span>
     </div>
   </form>
 </div>
@@ -170,9 +170,9 @@
 <div id="loading-overlay"
      class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
   <div class="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center max-w-xs w-full mx-4">
-    <div class="w-12 h-12 border-4 border-gray-200 border-t-[#E20820] rounded-full animate-spin mb-4"></div>
-    <p class="text-sm font-semibold text-slate-800 text-center">Mengambil data dari GBP API...</p>
-    <p class="text-xs text-slate-400 text-center mt-1">Mungkin memerlukan beberapa menit</p>
+    <div class="w-12 h-12 border-4 border-[#F4F3FB] border-t-[#6C5DD3] rounded-full animate-spin mb-4"></div>
+    <p class="text-sm font-semibold text-[#1F1B3F] text-center">Mengambil data dari GBP API...</p>
+    <p class="text-xs text-[#8C8AA0] text-center mt-1">Mungkin memerlukan beberapa menit</p>
   </div>
 </div>
 
@@ -182,13 +182,13 @@
 {% if result %}
 
 <!-- ── Summary Metrics ────────────────────────────────── -->
-<div class="bg-white rounded-2xl border border-gray-200 shadow-card p-5 mb-5">
+<div class="form-card mb-5">
   <div class="flex items-center justify-between mb-4">
-    <h2 class="text-sm font-semibold text-slate-800">Hasil Rekonsiliasi</h2>
-    <span class="text-xs text-slate-400">
-      Master: <strong class="text-slate-700">{{ master_row_count }}</strong> baris ·
-      API: <strong class="text-slate-700">{{ api_row_count }}</strong> baris
-      {% if master_source_label %} · <code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded">{{ master_source_label }}</code>{% endif %}
+    <h2 class="text-sm font-display font-semibold text-[#1F1B3F]">Hasil Rekonsiliasi</h2>
+    <span class="text-xs text-[#8C8AA0]">
+      Master: <strong class="text-[#1F1B3F]">{{ master_row_count }}</strong> baris ·
+      API: <strong class="text-[#1F1B3F]">{{ api_row_count }}</strong> baris
+      {% if master_source_label %} · <code class="text-xs bg-[#F4F3FB] text-[#6C5DD3] px-1.5 py-0.5 rounded font-mono">{{ master_source_label }}</code>{% endif %}
     </span>
   </div>
   <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
@@ -204,13 +204,13 @@
       <div class="text-xl font-bold text-amber-700 tabular-nums">{{ summary.manual_review }}</div>
       <div class="text-xs text-amber-600 mt-0.5">Manual Review</div>
     </div>
-    <div class="text-center p-3 rounded-xl bg-slate-50 border border-slate-200">
-      <div class="text-xl font-bold text-slate-700 tabular-nums">{{ summary.not_found }}</div>
-      <div class="text-xs text-slate-500 mt-0.5">Not Found</div>
+    <div class="text-center p-3 rounded-xl bg-[#F4F3FB] border border-indigo-100">
+      <div class="text-xl font-bold text-[#8C8AA0] tabular-nums font-display">{{ summary.not_found }}</div>
+      <div class="text-xs text-[#8C8AA0] mt-0.5">Not Found</div>
     </div>
-    <div class="text-center p-3 rounded-xl bg-slate-50 border border-slate-200">
-      <div class="text-xl font-bold text-slate-500 tabular-nums">{{ summary.invalid }}</div>
-      <div class="text-xs text-slate-400 mt-0.5">Invalid</div>
+    <div class="text-center p-3 rounded-xl bg-red-50 border border-red-100">
+      <div class="text-xl font-bold text-red-600 tabular-nums font-display">{{ summary.invalid }}</div>
+      <div class="text-xs text-red-400 mt-0.5">Invalid</div>
     </div>
   </div>
   {% if save_result_msg %}
@@ -224,8 +224,8 @@
 </div>
 
 <!-- ── Network yang Berubah ───────────────────────────── -->
-<div class="bg-white rounded-2xl border border-gray-200 shadow-card p-5 mb-5">
-  <h3 class="text-sm font-semibold text-slate-800 mb-3">Network yang Mengalami Perubahan Status Verifikasi</h3>
+<div class="form-card mb-5">
+  <h3 class="text-sm font-display font-semibold text-[#1F1B3F] mb-3">Network yang Mengalami Perubahan Status Verifikasi</h3>
 
   {% if changed_rows %}
   <div class="space-y-2">
@@ -234,7 +234,7 @@
       <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
       </svg>
-      <span class="text-slate-700">
+      <span class="text-[#1F1B3F]">
         <strong>{{ row.identifier_value }}</strong> mengalami perubahan status verifikasi dari
         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold
           {% if row.old_status == 'Verified' %}bg-emerald-100 text-emerald-800
@@ -256,7 +256,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-500">
+  <div class="flex items-center gap-3 p-3 rounded-xl bg-[#F4F3FB] border border-indigo-100 text-sm text-[#8C8AA0]">
     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
     </svg>
@@ -266,16 +266,16 @@
 </div>
 
 <!-- ── Tabel Hasil Pencocokan ─────────────────────────── -->
-<div class="bg-white rounded-2xl border border-gray-200 shadow-card">
-  <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-    <h3 class="text-sm font-semibold text-slate-800">
+<div class="form-card p-0 overflow-hidden">
+  <div class="px-5 py-4 border-b border-[#F4F3FB] flex items-center justify-between">
+    <h3 class="text-sm font-display font-semibold text-[#1F1B3F]">
       Tabel Hasil Pencocokan
-      <span class="ml-1.5 text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{{ comparison_rows|length }} baris</span>
+      <span class="ml-1.5 text-xs font-medium text-[#8C8AA0] bg-[#F4F3FB] px-2 py-0.5 rounded-full">{{ comparison_rows|length }} baris</span>
     </h3>
     <!-- Toggle collapse -->
     <button onclick="toggleResultTable()"
             id="toggle-table-btn"
-            class="text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors">
+            class="text-xs font-medium text-[#8C8AA0] hover:text-[#1F1B3F] transition-colors">
       Sembunyikan ▲
     </button>
   </div>
@@ -284,19 +284,19 @@
     <div class="overflow-x-auto">
       <table class="w-full text-sm" id="comparison-table">
         <thead>
-          <tr class="border-b border-gray-100">
-            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status Match</th>
-            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Rule</th>
-            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Identifier</th>
-            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status Lama</th>
-            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status Baru</th>
-            <th class="px-5 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">Berubah?</th>
-            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Catatan</th>
+          <tr class="bg-[#F4F3FB] border-b border-[#F4F3FB]">
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Status Match</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Rule</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Identifier</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Status Lama</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Status Baru</th>
+            <th class="px-5 py-3 text-center text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Berubah?</th>
+            <th class="px-5 py-3 text-left text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Catatan</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
           {% for row in comparison_rows %}
-          <tr class="hover:bg-gray-50/60 transition-colors {% if row.status_changed %}bg-blue-50/30{% endif %}">
+          <tr class="hover:bg-[rgba(108,93,211,0.04)] transition-colors {% if row.status_changed %}bg-indigo-50/40{% endif %} divide-y divide-[#F4F3FB]">
             <td class="px-5 py-3">
               {% with ms=row.match_status %}
               <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold
@@ -309,8 +309,8 @@
               </span>
               {% endwith %}
             </td>
-            <td class="px-5 py-3 text-xs text-slate-400 max-w-24 truncate">{{ row.match_rule }}</td>
-            <td class="px-5 py-3 font-medium text-slate-800">{{ row.identifier_value|default:"—" }}</td>
+            <td class="px-5 py-3 text-xs text-[#8C8AA0] max-w-24 truncate">{{ row.match_rule }}</td>
+            <td class="px-5 py-3 font-medium text-[#1F1B3F]">{{ row.identifier_value|default:"—" }}</td>
             <td class="px-5 py-3">
               {% if row.old_status %}
               <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
@@ -339,28 +339,28 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
               </svg>
               {% else %}
-              <span class="text-slate-300">—</span>
+              <span class="text-[#8C8AA0]">—</span>
               {% endif %}
             </td>
-            <td class="px-5 py-3 text-xs text-slate-400 max-w-48 truncate">{{ row.change_note|default:"—" }}</td>
+            <td class="px-5 py-3 text-xs text-[#8C8AA0] max-w-48 truncate">{{ row.change_note|default:"—" }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="7" class="px-5 py-8 text-center text-sm text-slate-400">Tidak ada data.</td></tr>
+          <tr><td colspan="7" class="px-5 py-8 text-center text-sm text-[#8C8AA0]">Tidak ada data.</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
 
     <!-- ── Download Button — tepat di bawah tabel ────── -->
-    <div class="px-5 py-4 border-t border-gray-100 flex items-center justify-between">
-      <span class="text-xs text-slate-400">
+    <div class="px-5 py-4 border-t border-[#F4F3FB] flex items-center justify-between">
+      <span class="text-xs text-[#8C8AA0]">
         Job #{{ job.pk }} disimpan ke database ·
         {{ comparison_rows|length }} baris
       </span>
       {% if job %}
       <a href="{% url 'gbp:download_reconciliation' job.pk %}"
          id="btn-download-reconciliation"
-         class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accent-700 shadow-md shadow-accent/20 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">
+         class="btn-teal hover:-translate-y-0.5 active:scale-95">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
         </svg>
@@ -386,16 +386,16 @@
     if (value === 'sqlite') {
       csvGroup.classList.add('hidden');
       sqliteGroup.classList.remove('hidden');
-      labelSqlite.classList.add('border-[#E20820]', 'bg-red-50');
+      labelSqlite.classList.add('border-[#6C5DD3]', 'bg-[#F4F3FB]');
       labelSqlite.classList.remove('border-gray-200');
-      labelCsv.classList.remove('border-[#E20820]', 'bg-red-50');
+      labelCsv.classList.remove('border-[#6C5DD3]', 'bg-[#F4F3FB]');
       labelCsv.classList.add('border-gray-200');
     } else {
       csvGroup.classList.remove('hidden');
       sqliteGroup.classList.add('hidden');
-      labelCsv.classList.add('border-[#E20820]', 'bg-red-50');
+      labelCsv.classList.add('border-[#6C5DD3]', 'bg-[#F4F3FB]');
       labelCsv.classList.remove('border-gray-200');
-      labelSqlite.classList.remove('border-[#E20820]', 'bg-red-50');
+      labelSqlite.classList.remove('border-[#6C5DD3]', 'bg-[#F4F3FB]');
       labelSqlite.classList.add('border-gray-200');
     }
   }
@@ -417,11 +417,11 @@
   const fileInput = document.getElementById('master-file-input');
   if (dropArea && fileInput) {
     dropArea.addEventListener('click', () => fileInput.click());
-    dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('border-[#E20820]', 'bg-red-50'); });
-    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('border-[#E20820]', 'bg-red-50'));
+    dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('border-[#6C5DD3]', 'bg-[#F4F3FB]'); });
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('border-[#6C5DD3]', 'bg-[#F4F3FB]'));
     dropArea.addEventListener('drop', (e) => {
       e.preventDefault();
-      dropArea.classList.remove('border-[#E20820]', 'bg-red-50');
+      dropArea.classList.remove('border-[#6C5DD3]', 'bg-[#F4F3FB]');
       if (e.dataTransfer.files.length) {
         fileInput.files = e.dataTransfer.files;
         showFileName(fileInput);

@@ -294,7 +294,7 @@ class MapView(View):
             </div>
             """
             m.get_root().html.add_child(folium.Element(legend_html))
-            map_html = m.get_root().render()
+            map_html = m._repr_html_()
 
             # ==========================================
             # PETA 2: BERDASARKAN JENIS NETWORK
@@ -344,7 +344,7 @@ class MapView(View):
             </div>
             """
             m_network.get_root().html.add_child(folium.Element(legend_network_html))
-            map_network_html = m_network.get_root().render()
+            map_network_html = m_network._repr_html_()
 
         ctx.update({
             "map_html": map_html,

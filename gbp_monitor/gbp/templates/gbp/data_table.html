@@ -2,217 +2,162 @@
 {% block title %}Store Data{% endblock %}
 
 {% block breadcrumb %}
-<span class="text-slate-500">Dashboard</span>
-<span class="text-slate-300 mx-1">/</span>
-<span class="text-slate-700 font-medium">Store Data</span>
+<span class="text-[#8C8AA0] text-sm">Dashboard</span>
+<span class="text-[#8C8AA0] mx-2 text-sm">/</span>
+<span class="text-[#1F1B3F] font-medium text-sm">Store Data</span>
 {% endblock %}
 
 {% block content %}
 
 <style>
-  /* ── Reference-style design tokens ─────────────────── */
-  :root {
-    --accent-gold: #F5C842;
-    --accent-gold-light: #FDF6D3;
-    --accent-gold-mid: #FAE87A;
-    --surface: #FFFFFF;
-    --surface-warm: #FAFAF7;
-    --border-soft: #EBEBEB;
-    --text-primary: #1A1A1A;
-    --text-secondary: #6B6B6B;
-    --text-muted: #A0A0A0;
-  }
-
-  .dt-page { background: var(--surface-warm); min-height: 100%; }
-
-  /* Page title */
-  .dt-title { font-size: 1.875rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
-  .dt-subtitle { font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px; }
-
-  /* Filter bar */
+  /* ── Filter pill controls ─────────────────────────────── */
   .filter-bar {
-    background: var(--surface);
-    border: 1px solid var(--border-soft);
-    border-radius: 14px;
+    background: #fff;
+    border: 1px solid rgba(108,93,211,0.1);
+    border-radius: 16px;
     padding: 10px 14px;
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 8px rgba(108,93,211,0.06);
     margin-bottom: 16px;
   }
-
-  /* Pill dropdown buttons */
   .pill-btn {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 6px 12px; border-radius: 999px;
-    border: 1px solid var(--border-soft);
-    background: var(--surface); color: var(--text-primary);
+    border: 1px solid rgba(108,93,211,0.15);
+    background: #fff; color: #1F1B3F;
     font-size: 0.8125rem; font-weight: 500; cursor: pointer;
     transition: all 0.15s; white-space: nowrap;
   }
-  .pill-btn:hover { border-color: #BFBFBF; background: #F5F5F5; }
-  .pill-btn svg { width: 12px; height: 12px; color: var(--text-muted); }
-
-  /* Search input */
+  .pill-btn:hover { border-color: #6C5DD3; background: #F4F3FB; color: #6C5DD3; }
+  .pill-btn svg { width: 12px; height: 12px; color: #8C8AA0; }
   .search-pill {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 6px 12px; border-radius: 999px;
-    border: 1px solid var(--border-soft);
-    background: var(--surface);
-    font-size: 0.8125rem; color: var(--text-primary);
+    border: 1px solid rgba(108,93,211,0.15);
+    background: #fff;
+    font-size: 0.8125rem; color: #1F1B3F;
     min-width: 160px; transition: all 0.15s;
   }
-  .search-pill:focus-within { border-color: #BFBFBF; box-shadow: 0 0 0 3px rgba(245,200,66,0.15); }
+  .search-pill:focus-within { border-color: #6C5DD3; box-shadow: 0 0 0 3px rgba(108,93,211,0.12); }
   .search-pill input { border: none; outline: none; background: transparent; font-size: 0.8125rem; width: 100%; }
-  .search-pill input::placeholder { color: var(--text-muted); }
-  .search-pill svg { width: 13px; height: 13px; color: var(--text-muted); flex-shrink: 0; }
-
-  /* Export button pill */
+  .search-pill input::placeholder { color: #8C8AA0; }
+  .search-pill svg { width: 13px; height: 13px; color: #8C8AA0; flex-shrink: 0; }
   .export-pill {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 6px 14px; border-radius: 999px;
-    border: 1px solid var(--border-soft);
-    background: var(--surface); color: var(--text-primary);
-    font-size: 0.8125rem; font-weight: 500; cursor: pointer;
+    border: 1px solid rgba(108,93,211,0.15);
+    background: #fff; color: #6C5DD3;
+    font-size: 0.8125rem; font-weight: 600; cursor: pointer;
     transition: all 0.15s; text-decoration: none;
   }
-  .export-pill:hover { border-color: #BFBFBF; background: #F5F5F5; color: var(--text-primary); }
+  .export-pill:hover { border-color: #6C5DD3; background: #6C5DD3; color: #fff; }
   .export-pill svg { width: 13px; height: 13px; }
+  .divider-v { width: 1px; height: 20px; background: rgba(108,93,211,0.1); flex-shrink: 0; }
 
-  .divider-v { width: 1px; height: 20px; background: var(--border-soft); flex-shrink: 0; }
-
-  /* Table card */
-  .table-card {
-    background: var(--surface);
-    border: 1px solid var(--border-soft);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-  }
-
-  /* Table */
+  /* ── Table ────────────────────────────────────────────── */
   .dt-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
-
-  .dt-table thead tr {
-    border-bottom: 1px solid var(--border-soft);
-  }
-
+  .dt-table thead tr { border-bottom: 1px solid rgba(108,93,211,0.08); }
   .dt-table th {
-    padding: 11px 16px;
+    padding: 12px 16px;
     text-align: left;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    color: var(--text-muted);
-    text-transform: none;
-    letter-spacing: 0;
+    color: #8C8AA0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     white-space: nowrap;
+    background: #F4F3FB;
   }
-  .dt-table th .sort-icon { display: inline-flex; flex-direction: column; gap: 1px; margin-left: 4px; vertical-align: middle; }
-  .dt-table th .sort-icon span { display: block; width: 0; height: 0; }
-  .dt-table th .sort-icon span.up { border-left: 3px solid transparent; border-right: 3px solid transparent; border-bottom: 4px solid #CCCCCC; }
-  .dt-table th .sort-icon span.down { border-left: 3px solid transparent; border-right: 3px solid transparent; border-top: 4px solid #CCCCCC; }
-
   .dt-table tbody tr {
-    border-bottom: 1px solid #F5F5F5;
+    border-bottom: 1px solid #F4F3FB;
     transition: background 0.12s;
     cursor: pointer;
   }
   .dt-table tbody tr:last-child { border-bottom: none; }
-  .dt-table tbody tr:hover { background: var(--accent-gold-light); }
-  .dt-table tbody tr.row-selected { background: var(--accent-gold-mid) !important; }
-
-  .dt-table td { padding: 11px 16px; color: var(--text-primary); vertical-align: middle; }
+  .dt-table tbody tr:hover { background: rgba(108,93,211,0.04); }
+  .dt-table tbody tr.row-selected { background: rgba(108,93,211,0.08) !important; }
+  .dt-table td { padding: 11px 16px; color: #1F1B3F; vertical-align: middle; }
 
   /* Store code badge */
   .store-badge {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.75rem;
-    background: #F3F4F6;
-    color: #4B5563;
-    padding: 2px 7px;
-    border-radius: 5px;
-    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    background: #F4F3FB;
+    color: #6C5DD3;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
-  /* Status badges */
-  .badge {
+  /* Inline status badge styles for table */
+  .tbadge {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 3px 10px; border-radius: 999px;
     font-size: 0.72rem; font-weight: 600; white-space: nowrap;
   }
-  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-  .badge-verified   { background: #ECFDF5; color: #15803D; }
-  .badge-verified::before { background: #22C55E; }
-  .badge-duplicate  { background: #FFFBEB; color: #92400E; }
-  .badge-duplicate::before { background: #F59E0B; }
-  .badge-suspended  { background: #FEF2F2; color: #B91C1C; }
-  .badge-suspended::before { background: #EF4444; }
-  .badge-unverified { background: #F8FAFC; color: #475569; }
-  .badge-unverified::before { background: #94A3B8; }
+  .tbadge::before { content:''; width:6px; height:6px; border-radius:50%; display:inline-block; }
+  .tbadge-verified   { background:#ECFDF5; color:#15803D; } .tbadge-verified::before   { background:#22C55E; }
+  .tbadge-duplicate  { background:#FFF7ED; color:#9A3412; } .tbadge-duplicate::before  { background:#F97316; }
+  .tbadge-suspended  { background:#FEF2F2; color:#B91C1C; } .tbadge-suspended::before  { background:#EF4444; }
+  .tbadge-unverified { background:#F4F3FB; color:#8C8AA0; } .tbadge-unverified::before { background:#8C8AA0; }
 
   /* Row checkbox */
-  .row-check {
-    width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent-gold);
-    border-radius: 4px;
-  }
+  .row-check { width: 15px; height: 15px; cursor: pointer; accent-color: #6C5DD3; border-radius: 4px; }
+  .col-check { width: 36px; padding-left: 16px !important; padding-right: 4px !important; }
 
   /* Action link */
   .act-link {
-    padding: 4px 10px; border-radius: 7px;
-    border: 1px solid var(--border-soft);
+    padding: 4px 10px; border-radius: 8px;
+    border: 1px solid rgba(108,93,211,0.15);
     font-size: 0.73rem; font-weight: 500;
-    color: var(--text-secondary); text-decoration: none;
+    color: #6C5DD3; text-decoration: none;
     transition: all 0.12s;
   }
-  .act-link:hover { border-color: #B8A800; color: #7A6E00; background: var(--accent-gold-light); }
+  .act-link:hover { border-color: #6C5DD3; background: #6C5DD3; color: #fff; }
 
   /* Pagination */
   .pag-btn {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 30px; height: 30px; border-radius: 8px;
-    border: 1px solid var(--border-soft);
-    font-size: 0.8rem; color: var(--text-secondary);
+    width: 32px; height: 32px; border-radius: 10px;
+    border: 1px solid rgba(108,93,211,0.15);
+    font-size: 0.8rem; color: #8C8AA0;
     text-decoration: none; transition: all 0.12s;
   }
-  .pag-btn:hover { background: #F5F5F5; border-color: #BFBFBF; color: var(--text-primary); }
-  .pag-btn.active { background: var(--accent-gold); border-color: var(--accent-gold); color: #1A1A1A; font-weight: 600; }
+  .pag-btn:hover { background: #F4F3FB; border-color: #6C5DD3; color: #6C5DD3; }
+  .pag-btn.active { background: #6C5DD3; border-color: #6C5DD3; color: #fff; font-weight: 700; }
 
-  /* Checkbox column */
-  .col-check { width: 36px; padding-left: 16px !important; padding-right: 4px !important; }
-
-  /* Status filter checkboxes inside filter bar */
+  /* Status filter pills */
   .status-cb-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .status-cb-label {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 5px 10px; border-radius: 999px;
-    border: 1.5px solid var(--border-soft);
+    border: 1.5px solid rgba(108,93,211,0.15);
     font-size: 0.78rem; font-weight: 500;
     cursor: pointer; transition: all 0.15s; user-select: none;
+    color: #8C8AA0;
   }
   .status-cb-label input[type="checkbox"] { display: none; }
   .status-cb-label .dot { width: 7px; height: 7px; border-radius: 50%; }
-  .status-cb-label.active { border-color: currentColor; }
-  .status-cb-label.verified { color: #16A34A; }
-  .status-cb-label.verified.active { background: #ECFDF5; border-color: #16A34A; }
-  .status-cb-label.duplicate { color: #92400E; }
-  .status-cb-label.duplicate.active { background: #FFFBEB; border-color: #D97706; }
-  .status-cb-label.suspended { color: #B91C1C; }
-  .status-cb-label.suspended.active { background: #FEF2F2; border-color: #EF4444; }
-  .status-cb-label.unverified { color: #475569; }
-  .status-cb-label.unverified.active { background: #F8FAFC; border-color: #94A3B8; }
+  .status-cb-label.active { color: #1F1B3F; border-color: currentColor; background: #F4F3FB; }
+  .status-cb-label.verified.active   { color: #15803D; background: #ECFDF5; border-color: #22C55E; }
+  .status-cb-label.duplicate.active  { color: #9A3412; background: #FFF7ED; border-color: #F97316; }
+  .status-cb-label.suspended.active  { color: #B91C1C; background: #FEF2F2; border-color: #EF4444; }
+  .status-cb-label.unverified.active { color: #8C8AA0; background: #F4F3FB; border-color: #8C8AA0; }
 </style>
 
 {% if no_data %}
 <div class="flex flex-col items-center justify-center py-24 text-center">
-  <div class="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center mb-5">
-    <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+  <div class="w-20 h-20 rounded-3xl bg-[#F4F3FB] flex items-center justify-center mb-5">
+    <svg class="w-10 h-10 text-[#8C8AA0]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
       <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M10 6h11M10 18h11M3 6h4M3 18h4"/>
     </svg>
   </div>
-  <h2 class="text-xl font-semibold text-slate-800 mb-2">Belum Ada Data</h2>
-  <p class="text-slate-500 text-sm">Jalankan fetch data terlebih dahulu.</p>
+  <h2 class="text-xl font-semibold text-[#1F1B3F] mb-2">Belum Ada Data</h2>
+  <p class="text-[#8C8AA0] text-sm">Jalankan fetch data terlebih dahulu.</p>
 </div>
 
 {% else %}
@@ -220,9 +165,9 @@
 <!-- ── Page Header ─────────────────────────────────────── -->
 <div class="mb-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
   <div>
-    <h1 class="dt-title">Store Data</h1>
-    <p class="dt-subtitle">
-      Menampilkan <strong>{{ total_count }}</strong> lokasi{% if sel_run %} dari Run #{{ sel_run.run_id }}{% endif %}
+    <h1 class="text-2xl font-display font-bold text-[#1F1B3F] tracking-tight">Store Data</h1>
+    <p class="text-sm text-[#8C8AA0] mt-0.5">
+      Menampilkan <strong class="text-[#6C5DD3]">{{ total_count }}</strong> lokasi{% if sel_run %} dari Run #{{ sel_run.run_id }}{% endif %}
     </p>
   </div>
 </div>
@@ -233,7 +178,7 @@
   <div class="filter-bar">
 
     <!-- Search -->
-    <div class="search-pill" style="flex:1;min-width:180px;max-width:280px;">
+    <div class="search-pill" style="flex:1;min-width:180px;max-width:300px;">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
       </svg>
@@ -247,12 +192,12 @@
       {% for s in all_statuses %}
       <label class="status-cb-label
         {% if s == 'Verified' %}verified{% elif s == 'Duplicate' %}duplicate{% elif s == 'Suspended' %}suspended{% else %}unverified{% endif %}
-        {% if s in statuses %}active{% endif %}" id="lbl-{{ forloop.counter }}">
+        {% if s in statuses %}active{% endif %}">
         <input type="checkbox" name="statuses" value="{{ s }}"
                {% if s in statuses %}checked{% endif %}
                onchange="this.closest('label').classList.toggle('active', this.checked); document.getElementById('filter-form').submit()">
         <span class="dot
-          {% if s == 'Verified' %}bg-green-500{% elif s == 'Duplicate' %}bg-amber-500{% elif s == 'Suspended' %}bg-red-500{% else %}bg-slate-400{% endif %}"></span>
+          {% if s == 'Verified' %}bg-green-500{% elif s == 'Duplicate' %}bg-orange-500{% elif s == 'Suspended' %}bg-red-500{% else %}bg-[#8C8AA0]{% endif %}"></span>
         {{ s }}
       </label>
       {% endfor %}
@@ -262,14 +207,14 @@
 
     <!-- Sort -->
     <select name="sort" onchange="document.getElementById('filter-form').submit()"
-            class="pill-btn" style="cursor:pointer;appearance:none;padding-right:22px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
+            class="pill-btn" style="cursor:pointer;appearance:none;padding-right:22px;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238C8AA0'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 8px center;">
       <option value="business_name" {% if sort_col == 'business_name' %}selected{% endif %}>Nama Bisnis</option>
       <option value="store_code"    {% if sort_col == 'store_code' %}selected{% endif %}>Store Code</option>
       <option value="status"        {% if sort_col == 'status' %}selected{% endif %}>Status</option>
       <option value="fetched_at"    {% if sort_col == 'fetched_at' %}selected{% endif %}>Waktu Fetch</option>
     </select>
     <select name="order" onchange="document.getElementById('filter-form').submit()"
-            class="pill-btn" style="cursor:pointer;appearance:none;padding-right:22px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
+            class="pill-btn" style="cursor:pointer;appearance:none;padding-right:22px;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238C8AA0'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 8px center;">
       <option value="asc"  {% if sort_order == 'asc' %}selected{% endif %}>A → Z</option>
       <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Z → A</option>
     </select>
@@ -282,18 +227,18 @@
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
       </svg>
-      Export CSV
+      CSV
     </a>
     <a href="{% url 'gbp:export_excel' %}?run_id={{ sel_run_id }}{% if search %}&search={{ search }}{% endif %}{% for s in statuses %}&status={{ s }}{% endfor %}"
        id="btn-export-excel" class="export-pill">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
       </svg>
-      Export Excel
+      Excel
     </a>
 
     {% if search or statuses|length < all_statuses|length %}
-    <a href="{% url 'gbp:data_table' %}?run_id={{ sel_run_id }}" class="pill-btn" style="color:#888;">
+    <a href="{% url 'gbp:data_table' %}?run_id={{ sel_run_id }}" class="pill-btn text-[#8C8AA0] hover:text-red-500 hover:border-red-300">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
       </svg>
@@ -331,26 +276,26 @@
           <td style="font-weight:500;max-width:200px;" class="truncate">
             {{ snap.business_name|default:"—" }}
           </td>
-          <td class="hidden md:table-cell" style="color:var(--text-secondary);font-size:0.78rem;max-width:200px;" class="truncate">
+          <td class="hidden md:table-cell text-[#8C8AA0] text-xs truncate" style="max-width:200px;">
             {{ snap.address|default:"—" }}
           </td>
-          <td class="hidden lg:table-cell" style="font-family:monospace;font-size:0.72rem;color:var(--text-muted);">
+          <td class="hidden lg:table-cell" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#8C8AA0;">
             {% if snap.latitude and snap.longitude %}
               {{ snap.latitude|floatformat:5 }}<br>{{ snap.longitude|floatformat:5 }}
             {% else %}—{% endif %}
           </td>
           <td>
             {% with s=snap.status %}
-            <span class="badge
-              {% if s == 'Verified' %}badge-verified
-              {% elif s == 'Duplicate' %}badge-duplicate
-              {% elif s == 'Suspended' %}badge-suspended
-              {% else %}badge-unverified{% endif %}">
+            <span class="tbadge
+              {% if s == 'Verified' %}tbadge-verified
+              {% elif s == 'Duplicate' %}tbadge-duplicate
+              {% elif s == 'Suspended' %}tbadge-suspended
+              {% else %}tbadge-unverified{% endif %}">
               {{ s }}
             </span>
             {% endwith %}
           </td>
-          <td class="hidden lg:table-cell" style="font-family:monospace;font-size:0.72rem;color:var(--text-muted);">
+          <td class="hidden lg:table-cell" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#8C8AA0;">
             {{ snap.fetched_at|default:"—" }}
           </td>
           <td onclick="event.stopPropagation()">
@@ -365,12 +310,14 @@
         {% empty %}
         <tr>
           <td colspan="8" style="padding:60px 16px;text-align:center;">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-              <svg style="width:36px;height:36px;color:#CBD5E1;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-              <p style="font-size:0.875rem;font-weight:500;color:#64748B;">Tidak ada data yang cocok</p>
-              <p style="font-size:0.78rem;color:#94A3B8;">Coba ubah filter atau kata kunci pencarian</p>
+            <div class="flex flex-col items-center gap-3">
+              <div class="w-14 h-14 rounded-2xl bg-[#F4F3FB] flex items-center justify-center">
+                <svg class="w-7 h-7 text-[#8C8AA0]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </div>
+              <p class="text-sm font-medium text-[#1F1B3F]">Tidak ada data yang cocok</p>
+              <p class="text-xs text-[#8C8AA0]">Coba ubah filter atau kata kunci pencarian</p>
             </div>
           </td>
         </tr>
@@ -381,11 +328,11 @@
 
   <!-- Pagination -->
   {% if paginator.num_pages > 1 %}
-  <div style="padding:12px 16px;border-top:1px solid #F0F0F0;display:flex;align-items:center;justify-content:space-between;">
-    <span style="font-size:0.78rem;color:var(--text-muted);">
+  <div class="px-4 py-3 border-t border-[#F4F3FB] flex items-center justify-between">
+    <span class="text-xs text-[#8C8AA0]">
       Halaman {{ page_obj.number }} dari {{ paginator.num_pages }} &nbsp;·&nbsp; {{ total_count }} total
     </span>
-    <div style="display:flex;gap:4px;align-items:center;">
+    <div class="flex gap-1.5 items-center">
       {% if page_obj.has_previous %}
       <a href="?run_id={{ sel_run_id }}&page=1{% if search %}&search={{ search }}{% endif %}{% if sort_col %}&sort={{ sort_col }}&order={{ sort_order }}{% endif %}{% for s in statuses %}&statuses={{ s }}{% endfor %}" class="pag-btn">«</a>
       <a href="?run_id={{ sel_run_id }}&page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if sort_col %}&sort={{ sort_col }}&order={{ sort_order }}{% endif %}{% for s in statuses %}&statuses={{ s }}{% endfor %}" class="pag-btn">‹</a>
@@ -401,23 +348,18 @@
 </div>
 
 <script>
-  // Row toggle highlight
   function toggleRow(tr) {
     tr.classList.toggle('row-selected');
     const cb = tr.querySelector('.row-cb');
     if (cb) cb.checked = tr.classList.contains('row-selected');
   }
-
-  // Check-all
   document.getElementById('check-all').addEventListener('change', function() {
-    document.querySelectorAll('.row-cb').forEach(cb => {
+    document.querySelectorAll('.row-cb').forEach(function(cb) {
       cb.checked = this.checked;
       cb.closest('tr').classList.toggle('row-selected', this.checked);
-    });
+    }.bind(this));
   });
-
-  // Individual checkbox sync
-  document.querySelectorAll('.row-cb').forEach(cb => {
+  document.querySelectorAll('.row-cb').forEach(function(cb) {
     cb.addEventListener('change', function() {
       this.closest('tr').classList.toggle('row-selected', this.checked);
     });

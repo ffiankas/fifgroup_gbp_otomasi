@@ -688,4 +688,4 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
     """
     m.get_root().html.add_child(folium.Element(legend_html))
 
-    return m.get_root().render()
+    return m._repr_html_()
