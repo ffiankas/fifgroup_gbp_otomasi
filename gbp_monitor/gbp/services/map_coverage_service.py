@@ -2,7 +2,8 @@
 map_coverage_service.py — Service untuk Branch Coverage Mode di Map View.
 
 Mengelompokkan network berdasarkan kesamaan 3 digit pertama store_code,
-membuat coverage polygon/circle overlay, dan menghasilkan Folium map HTML.
+dan menghasilkan Folium map HTML dengan batas wilayah kelurahan asli
+menggunakan metode Point-in-Polygon (shapely + pyshp).
 
 Fungsi utama:
   normalize_store_code(value)             → Normalisasi store_code dari berbagai format
@@ -12,11 +13,12 @@ Fungsi utama:
   build_branch_coverage_groups(run_id)    → Grouping coverage per cabang
   calculate_branch_coverage_summary(groups) → Summary agregat
   get_selected_branch_detail(groups, prefix) → Detail 1 cabang
-  build_branch_coverage_map(groups, ...)  → Generate Folium map HTML
+  build_branch_coverage_map(groups, ...)  → Generate Folium map HTML (Point-in-Polygon)
 """
 
 import logging
-import math
+import os
+import pickle
 import re
 from collections import defaultdict
 
@@ -423,68 +425,142 @@ def get_selected_branch_detail(result, prefix):
 
 
 # ══════════════════════════════════════════════════════════════════════
-# CONVEX HULL (Graham Scan — no external deps)
+# POINT-IN-POLYGON (Shapefile + Shapely)
 # ══════════════════════════════════════════════════════════════════════
 
-def _cross(o, a, b):
-    """Cross product of vectors OA and OB."""
-    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+# Path ke Shapefile Kel_Desa
+# __file__ = gbp_monitor/gbp/services/map_coverage_service.py
+# 2x dirname → gbp_monitor/gbp  → lalu masuk static/gbp/...
+_SHP_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "static", "gbp", "batas-administrasi-indonesia-master", "Kel_Desa", "Kel_Desa.shp"
+)
+# Cache path (disimpan di /tmp agar cepat)
+_CACHE_PATH = os.path.join(os.path.dirname(_SHP_DIR), "_pip_cache.pkl")
+
+# Module-level cache (in-memory saat server jalan)
+_shapefile_cache = None
 
 
-def _convex_hull(points_2d):
+def _load_shapefile_index():
     """
-    Compute convex hull using Andrew's monotone chain algorithm.
-    Input: list of (x, y) tuples.
-    Returns: list of (x, y) tuples forming the convex hull in CCW order.
+    Load shapefile dan bangun STRtree index untuk Point-in-Polygon cepat.
+    Hasil di-cache di memory (modul level) dan ke disk (pickle).
+
+    Returns:
+        (tree, shapes, records) atau (None, None, None) jika gagal.
     """
-    pts = sorted(set(points_2d))
-    if len(pts) <= 1:
-        return pts
+    global _shapefile_cache
 
-    # Build lower hull
-    lower = []
-    for p in pts:
-        while len(lower) >= 2 and _cross(lower[-2], lower[-1], p) <= 0:
-            lower.pop()
-        lower.append(p)
+    # Kembalikan cache in-memory jika sudah ada
+    if _shapefile_cache is not None:
+        return _shapefile_cache
 
-    # Build upper hull
-    upper = []
-    for p in reversed(pts):
-        while len(upper) >= 2 and _cross(upper[-2], upper[-1], p) <= 0:
-            upper.pop()
-        upper.append(p)
+    # Coba load dari disk cache
+    if os.path.exists(_CACHE_PATH):
+        try:
+            log.info("Loading PiP index from disk cache...")
+            with open(_CACHE_PATH, "rb") as f:
+                _shapefile_cache = pickle.load(f)
+            log.info("PiP index loaded from cache.")
+            return _shapefile_cache
+        except Exception as e:
+            log.warning(f"Cache load failed, rebuilding: {e}")
 
-    return lower[:-1] + upper[:-1]
+    # Build dari shapefile
+    if not os.path.exists(_SHP_DIR):
+        log.error(f"Shapefile tidak ditemukan: {_SHP_DIR}")
+        return None, None, None
+
+    try:
+        import shapefile as pyshp
+        from shapely.geometry import shape
+        from shapely.strtree import STRtree
+
+        log.info("Building Point-in-Polygon index dari shapefile (proses pertama kali, harap tunggu)...")
+        sf = pyshp.Reader(_SHP_DIR, encoding="utf-8")
+        fields = [f[0] for f in sf.fields[1:]]
+
+        shapes_list = []
+        records_list = []
+        geoms = []
+
+        for sr in sf.iterShapeRecords():
+            try:
+                geom = shape(sr.shape.__geo_interface__)
+                if not geom.is_valid:
+                    geom = geom.buffer(0)  # Fix invalid geometries
+                geoms.append(geom)
+                shapes_list.append(geom)
+                rec = {fields[i]: sr.record[i] for i in range(len(fields))}
+                records_list.append(rec)
+            except Exception:
+                # Skip shapes yang corrupt
+                shapes_list.append(None)
+                records_list.append({})
+
+        sf.close()
+
+        # Build STRtree hanya dari geom yang valid
+        valid_geoms = [g for g in geoms if g is not None]
+        tree = STRtree(valid_geoms)
+
+        result = (tree, shapes_list, records_list)
+        _shapefile_cache = result
+
+        # Simpan ke disk cache
+        try:
+            with open(_CACHE_PATH, "wb") as f:
+                pickle.dump(result, f, protocol=pickle.HIGHEST_PROTOCOL)
+            log.info("PiP index tersimpan ke disk cache.")
+        except Exception as e:
+            log.warning(f"Gagal simpan cache ke disk: {e}")
+
+        log.info(f"PiP index selesai dibangun: {len(valid_geoms)} poligon valid.")
+        return result
+
+    except ImportError as e:
+        log.error(f"Library tidak tersedia: {e}. Install dengan: pip install pyshp shapely")
+        return None, None, None
+    except Exception as e:
+        log.error(f"Error saat load shapefile: {e}")
+        return None, None, None
+
+
+def find_kelurahan_for_point(lat, lng):
+    """
+    Cari kelurahan yang mencakup titik koordinat (lat, lng).
+
+    Returns:
+        dict {'KEL_DESA': ..., 'KECAMATAN': ..., 'KAB_KOTA': ..., 'PROVINSI': ...}
+        atau None jika tidak ditemukan.
+    """
+    tree, shapes_list, records_list = _load_shapefile_index()
+    if tree is None:
+        return None
+
+    try:
+        from shapely.geometry import Point
+        point = Point(lng, lat)  # GeoJSON/Shapely: (x=lng, y=lat)
+        # Kandidat via bounding box (cepat)
+        candidates = tree.query(point)
+        for idx in candidates:
+            if shapes_list[idx] is not None and shapes_list[idx].contains(point):
+                return records_list[idx]
+    except Exception as e:
+        log.error(f"Error PiP untuk ({lat}, {lng}): {e}")
+    return None
 
 
 # ══════════════════════════════════════════════════════════════════════
-# CIRCLE BUFFER (approximate circle as polygon)
-# ══════════════════════════════════════════════════════════════════════
-
-def _circle_polygon(lat, lng, radius_km=3, num_points=36):
-    """
-    Generate a circle polygon around a point.
-    Returns list of [lat, lng] pairs.
-    """
-    coords = []
-    for i in range(num_points):
-        angle = math.radians(360 / num_points * i)
-        # Approximate: 1 degree lat ≈ 111km, 1 degree lng ≈ 111km * cos(lat)
-        d_lat = (radius_km / 111.0) * math.cos(angle)
-        d_lng = (radius_km / (111.0 * max(math.cos(math.radians(lat)), 0.01))) * math.sin(angle)
-        coords.append([lat + d_lat, lng + d_lng])
-    coords.append(coords[0])  # Close the polygon
-    return coords
-
-
-# ══════════════════════════════════════════════════════════════════════
-# MAP RENDERING
+# MAP RENDERING (Point-in-Polygon)
 # ══════════════════════════════════════════════════════════════════════
 
 def build_branch_coverage_map(result, selected_branch_prefix=None):
     """
-    Generate Folium map HTML untuk Branch Coverage Mode.
+    Generate Folium map HTML untuk Branch Coverage Mode menggunakan
+    Point-in-Polygon (shapely + pyshp) untuk menampilkan batas wilayah
+    kelurahan yang sebenarnya.
 
     Args:
         result: dict dari build_branch_coverage_groups()
@@ -494,12 +570,13 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
         string HTML map, atau "" jika tidak ada data
     """
     import folium
+    import json
 
     groups = result.get("groups", [])
     if not groups:
         return ""
 
-    # Kumpulkan semua titik valid untuk centering
+    # ── Kumpulkan semua titik valid untuk centering ──
     all_coords = []
     for g in groups:
         b = g["branch"]
@@ -512,13 +589,27 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
     if not all_coords:
         return ""
 
-    # Center map
     center_lat = sum(c[0] for c in all_coords) / len(all_coords)
     center_lng = sum(c[1] for c in all_coords) / len(all_coords)
 
     m = folium.Map(location=[center_lat, center_lng], zoom_start=6, tiles="CartoDB positron")
 
-    # Render setiap coverage group
+    # ── Cek apakah shapefile index tersedia ──
+    tree, shapes_list, records_list = _load_shapefile_index()
+    pip_available = tree is not None
+
+    if not pip_available:
+        log.warning("Shapefile index tidak tersedia. Peta akan tampil tanpa area coverage kelurahan.")
+
+    # ── Kelompokkan kelurahan yang ter-cover per cabang ──
+    # Struktur: { color: [ GeoJSON-polygon-dict, ... ] }
+    if pip_available:
+        try:
+            from shapely.geometry import shape as shapely_shape, mapping
+        except ImportError:
+            pip_available = False
+
+    # Render setiap group cabang
     for g in groups:
         branch = g["branch"]
         color = g["color"]
@@ -526,47 +617,72 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
         prefix = branch["prefix"]
         is_selected = (selected_branch_prefix == prefix)
 
-        # Kumpulkan semua titik valid dalam group (branch + children)
-        group_coords = []
-        if branch["has_coordinates"]:
-            group_coords.append((branch["latitude"], branch["longitude"]))
+        # ── Point-in-Polygon: cari kelurahan yang di-cover oleh grup ini ──
+        if pip_available:
+            # Kumpulkan semua titik valid (cabang + network yang ter-cover)
+            all_pts_in_group = []
+            if branch["has_coordinates"]:
+                all_pts_in_group.append((branch["latitude"], branch["longitude"]))
+            for c in covered:
+                if c["has_coordinates"]:
+                    all_pts_in_group.append((c["latitude"], c["longitude"]))
 
-        for c in covered:
-            if c["has_coordinates"]:
-                group_coords.append((c["latitude"], c["longitude"]))
+            # Temukan kelurahan unik yang dikunjungi titik-titik ini
+            covered_kelurahan_indices = set()
+            from shapely.geometry import Point as ShapelyPoint
+            for lat_pt, lng_pt in all_pts_in_group:
+                try:
+                    pt = ShapelyPoint(lng_pt, lat_pt)
+                    candidates = tree.query(pt)
+                    for idx in candidates:
+                        if shapes_list[idx] is not None and shapes_list[idx].contains(pt):
+                            covered_kelurahan_indices.add(idx)
+                            break  # Satu titik cukup masuk satu kelurahan
+                except Exception as e:
+                    log.debug(f"PiP error untuk ({lat_pt}, {lng_pt}): {e}")
 
-        # Coverage area overlay
-        if len(group_coords) >= 3:
-            # Convex Hull Polygon
-            hull = _convex_hull(group_coords)
-            if len(hull) >= 3:
-                hull_latlng = [[p[0], p[1]] for p in hull]
-                folium.Polygon(
-                    locations=hull_latlng,
-                    color=color,
-                    weight=2,
-                    fill=True,
-                    fill_color=color,
-                    fill_opacity=0.18,
-                    opacity=0.5,
-                    tooltip=f"Coverage: {branch['name']} ({prefix})",
-                ).add_to(m)
-        elif len(group_coords) >= 1:
-            # Circle buffer
-            center_pt = group_coords[0]
-            circle_coords = _circle_polygon(center_pt[0], center_pt[1], radius_km=3)
-            folium.Polygon(
-                locations=circle_coords,
-                color=color,
-                weight=2,
-                fill=True,
-                fill_color=color,
-                fill_opacity=0.18,
-                opacity=0.5,
-                tooltip=f"Coverage: {branch['name']} ({prefix})",
-            ).add_to(m)
+            # Tambahkan setiap kelurahan yang di-cover sebagai GeoJSON layer
+            for idx in covered_kelurahan_indices:
+                try:
+                    geom = shapes_list[idx]
+                    rec = records_list[idx]
+                    kel_name = rec.get("KEL_DESA", "")
+                    kec_name = rec.get("KECAMATAN", "")
+                    kab_name = rec.get("KAB_KOTA", "")
+                    prov_name = rec.get("PROVINSI", "")
 
-        # Branch marker (selalu tampil)
+                    geojson_feature = {
+                        "type": "Feature",
+                        "geometry": mapping(geom),
+                        "properties": {
+                            "name": kel_name,
+                            "kecamatan": kec_name,
+                            "kab_kota": kab_name,
+                            "provinsi": prov_name,
+                        }
+                    }
+
+                    tooltip_text = f"{kel_name}, {kec_name}, {kab_name}"
+                    folium.GeoJson(
+                        geojson_feature,
+                        style_function=lambda x, c=color: {
+                            "fillColor": c,
+                            "color": c,
+                            "weight": 1.5,
+                            "fillOpacity": 0.25,
+                            "opacity": 0.6,
+                        },
+                        tooltip=folium.GeoJsonTooltip(
+                            fields=["name", "kecamatan", "kab_kota"],
+                            aliases=["Kelurahan:", "Kecamatan:", "Kab/Kota:"],
+                            style="font-family:Inter,sans-serif;font-size:12px;",
+                        ),
+                        name=f"coverage_{prefix}_{idx}",
+                    ).add_to(m)
+                except Exception as e:
+                    log.debug(f"Error render kelurahan idx {idx}: {e}")
+
+        # ── Branch marker (selalu tampil) ──
         if branch["has_coordinates"]:
             summary = g["summary"]
             review_badge = ' <span style="background:#DC2626;color:white;padding:1px 6px;border-radius:4px;font-size:10px;">Manual Review</span>' if g.get("manual_review") else ""
@@ -614,7 +730,7 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
                 ),
             ).add_to(m)
 
-        # Child markers — hanya tampil jika cabang dipilih
+        # ── Child markers — hanya tampil jika cabang dipilih ──
         if is_selected:
             for c in covered:
                 if not c["has_coordinates"]:
@@ -623,7 +739,6 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
                 net = c["network"]
                 net_color = NETWORK_MARKER_COLORS.get(net, "#94A3B8")
 
-                # Status badge color
                 status_color_map = {
                     "Verified": "#16A34A",
                     "Duplicate": "#F59E0B",
@@ -632,6 +747,13 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
                     "Unverified": "#64748B",
                 }
                 status_color = status_color_map.get(c["status"], "#94A3B8")
+
+                # Cari kelurahan untuk child point
+                kel_info = ""
+                if pip_available and c["has_coordinates"]:
+                    kel = find_kelurahan_for_point(c["latitude"], c["longitude"])
+                    if kel:
+                        kel_info = f"<div style='font-size:11px;color:#7C3AED;margin-top:4px;font-weight:500'>📍 {kel.get('KEL_DESA','')}, {kel.get('KECAMATAN','')}</div>"
 
                 child_popup = f"""
                 <div style="font-family:Inter,sans-serif;min-width:240px;font-size:13px;padding:4px">
@@ -645,13 +767,13 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
                         <span style="background:{status_color};color:white;padding:2px 8px;border-radius:9999px;font-size:11px">{c['status']}</span>
                     </div>
                     <div style="font-size:12px;color:#64748B">📍 {c['address'] or '—'}</div>
+                    {kel_info}
                     <div style="font-size:11px;color:#94A3B8;margin-top:4px">
                         Cabang: {branch['name']} ({prefix})
                     </div>
                 </div>
                 """
 
-                # Marker radius/style berdasarkan jenis
                 radius = 6 if net == "Subkios" else 7
                 folium.CircleMarker(
                     location=[c["latitude"], c["longitude"]],
@@ -664,13 +786,15 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
                     tooltip=f"{c['name']} — {net} ({c['status']})",
                 ).add_to(m)
 
-    # Legend
+    # ── Legend ──
     legend_items = ""
-    for g in groups[:12]:  # Max 12 in legend
+    for g in groups[:12]:
         legend_items += f'<div style="margin-bottom:3px;display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:{g["color"]};flex-shrink:0;box-shadow:0 0 0 2px rgba(255,255,255,0.6)"></span><span style="font-size:12px">{g["branch"]["name"]} ({g["branch"]["prefix"]})</span></div>'
 
     if len(groups) > 12:
         legend_items += f'<div style="font-size:11px;color:#94A3B8;margin-top:4px">+{len(groups) - 12} cabang lainnya</div>'
+
+    pip_note = "Batas wilayah kelurahan ditampilkan menggunakan data BIG/BPS." if pip_available else "⚠️ Data shapefile tidak tersedia. Batas kelurahan tidak dapat ditampilkan."
 
     legend_html = f"""
     <div style="position:fixed;bottom:30px;left:30px;z-index:9999;
@@ -680,10 +804,7 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
         <b style="display:block;margin-bottom:8px;color:#0F172A;font-size:13px">Coverage Cabang</b>
         {legend_items}
         <hr style="margin:8px 0;border-color:#E2E8F0">
-        <div style="font-size:10px;color:#94A3B8;line-height:1.4">
-            Area coverage merupakan estimasi visual berdasarkan titik network,
-            bukan batas wilayah administratif resmi.
-        </div>
+        <div style="font-size:10px;color:#94A3B8;line-height:1.4">{pip_note}</div>
     </div>
     """
     m.get_root().html.add_child(folium.Element(legend_html))

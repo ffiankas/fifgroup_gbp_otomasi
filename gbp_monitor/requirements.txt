@@ -22,3 +22,5 @@ openpyxl==3.1.4
 
 # Map
 folium==0.16.0
+pyshp==3.1.4
+shapely==2.1.2
