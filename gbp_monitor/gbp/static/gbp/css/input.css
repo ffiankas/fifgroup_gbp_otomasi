@@ -7,9 +7,18 @@
 
   /* ── Dashboard Card ─────────────────────────────────────────── */
   .dash-card {
-    @apply bg-white rounded-3xl p-6 flex flex-col;
-    box-shadow: 0 4px 24px rgba(108, 93, 211, 0.08), 0 1px 4px rgba(108, 93, 211, 0.04);
-    border: 1px solid rgba(108, 93, 211, 0.08);
+    @apply backdrop-blur-2xl rounded-3xl p-6 flex flex-col relative overflow-hidden z-0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%);
+    box-shadow: 0 8px 32px 0 rgba(108, 93, 211, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+  .dash-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at center, rgba(108, 93, 211, 0.15) 0%, rgba(31, 182, 182, 0.08) 40%, transparent 60%);
+    z-index: -1;
+    pointer-events: none;
   }
 
   /* ── Progress Bars ───────────────────────────────────────────── */

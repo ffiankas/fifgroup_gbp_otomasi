@@ -55,5 +55,11 @@ module.exports = {
       },
     },
   },
+  safelist: [
+    'lg:ml-16',
+    'lg:ml-64',
+    'h-full',
+    'min-h-0',
+  ],
   plugins: [],
 }
