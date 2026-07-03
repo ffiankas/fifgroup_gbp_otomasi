@@ -22,7 +22,7 @@ import pickle
 import re
 from collections import defaultdict
 
-from gbp.models import FetchRun, LocationSnapshot, MasterLocation
+from gbp.models import FetchRun, LocationSnapshot, MasterLocation, BranchSalesRecord
 
 log = logging.getLogger("gbp.services.map_coverage_service")
 
@@ -178,6 +178,13 @@ def get_latest_network_points(run_id=None):
         status = snap.status if snap else (m.verification_status or "Unverified")
         address = snap.address if snap and snap.address else ""
 
+        # Fallback: jika snapshot tidak punya koordinat, gunakan koordinat manual dari MasterLocation
+        coord_source = "gbp_api"
+        if (lat is None or lng is None) and m.latitude is not None and m.longitude is not None:
+            lat = m.latitude
+            lng = m.longitude
+            coord_source = "manual"
+
         has_coords = lat is not None and lng is not None
         is_valid_sc = len(prefix) == 3
 
@@ -195,7 +202,9 @@ def get_latest_network_points(run_id=None):
             "address": address,
             "has_coordinates": has_coords,
             "is_valid_store_code": is_valid_sc,
+            "coord_source": coord_source,
         })
+
 
     return points
 
@@ -686,6 +695,46 @@ def build_branch_coverage_map(result, selected_branch_prefix=None):
         if branch["has_coordinates"]:
             summary = g["summary"]
             review_badge = ' <span style="background:#DC2626;color:white;padding:1px 6px;border-radius:4px;font-size:10px;">Manual Review</span>' if g.get("manual_review") else ""
+
+            # Query data penjualan terbaru untuk cabang ini
+            sales_rec = BranchSalesRecord.objects.filter(
+                branch_prefix=prefix
+            ).order_by("-period").first()
+
+            # Build sales card HTML
+            if sales_rec:
+                def _pct_html(label, val, display):
+                    if val is None:
+                        clr, arrow = "#94A3B8", ""
+                    elif val >= 0:
+                        clr, arrow = "#16A34A", "▲"
+                    else:
+                        clr, arrow = "#DC2626", "▼"
+                    return (
+                        f'<tr><td style="padding:2px 0;color:#64748B">{label}</td>'
+                        f'<td style="text-align:right;font-weight:600;color:{clr}">'
+                        f'{arrow} {display}</td></tr>'
+                    )
+
+                sales_card = f"""
+                <hr style="margin:8px 0;border-color:#E2E8F0">
+                <div style="font-weight:600;color:#0F172A;margin-bottom:6px">
+                    📊 Sales Performance
+                    <span style="font-size:10px;color:#94A3B8;font-weight:400;margin-left:4px">({sales_rec.period})</span>
+                </div>
+                <table style="width:100%;font-size:12px;border-collapse:collapse">
+                    <tr><td style="padding:2px 0;color:#64748B">NSA</td>
+                        <td style="text-align:right;font-weight:600;color:#0F172A;font-family:monospace">{sales_rec.nsa or '—'}</td></tr>
+                    {_pct_html("BP", sales_rec.bp, sales_rec.bp_display)}
+                    {_pct_html("MSCP", sales_rec.mscp, sales_rec.mscp_display)}
+                    {_pct_html("NL", sales_rec.nl, sales_rec.nl_display)}
+                </table>"""
+            else:
+                sales_card = """
+                <hr style="margin:8px 0;border-color:#E2E8F0">
+                <div style="font-size:11px;color:#94A3B8;text-align:center;padding:4px 0">
+                    📊 Data penjualan belum tersedia
+                </div>"""
 
             popup_html = f"""
             <div style="font-family:Inter,sans-serif;min-width:280px;font-size:13px;padding:6px">

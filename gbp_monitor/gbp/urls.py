@@ -25,4 +25,8 @@ urlpatterns = [
     # ── API internal ─────────────────────────────────────────────────────────────
     path("api/fetch-run/", views.TriggerFetchView.as_view(), name="trigger_fetch"),
     path("api/trend/", views.TrendDataView.as_view(), name="trend_data"),
+
+    # ── Sales Performance ─────────────────────────────────────────────────────────
+    path("upload-sales/", views.UploadSalesView.as_view(), name="upload_sales"),
+    path("download-sales-template/", views.DownloadSalesTemplateView.as_view(), name="download_sales_template"),
 ]

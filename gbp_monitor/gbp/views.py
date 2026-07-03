@@ -15,6 +15,8 @@ Views:
   DownloadReconDetailView   → GET /download/recon/<job_id>/
   TriggerFetchView          → POST /api/fetch-run/
   TrendDataView             → GET /api/trend/
+  UploadSalesView           → POST /upload-sales/
+  DownloadSalesTemplateView → GET /download-sales-template/
 """
 
 import json
@@ -29,7 +31,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
 from gbp.forms import DataTableFilterForm, UpdateStatusForm
-from gbp.models import FetchRun, LocationSnapshot, MasterLocation, ReconciliationJob, ReconciliationResult
+from gbp.models import FetchRun, LocationSnapshot, MasterLocation, ReconciliationJob, ReconciliationResult, BranchSalesRecord
 from gbp.services import export_service, history_service, reconciliation_service, dashboard_service
 from gbp.utils import ALL_STATUSES, PAGE_SIZE, STATUS_META, get_status_meta
 
@@ -776,3 +778,91 @@ class TrendDataView(View):
         days = int(request.GET.get("days", 30))
         trend = history_service.get_status_trend(days=days)
         return JsonResponse({"data": trend})
+
+
+# ══════════════════════════════════════════════════════════════════════
+# SALES PERFORMANCE
+# ══════════════════════════════════════════════════════════════════════
+
+_SALES_REQUIRED_COLS = {"branch_prefix", "branch_name", "period", "nsa", "bp", "mscp", "nl"}
+
+
+class UploadSalesView(View):
+    """
+    POST /upload-sales/
+    Menerima file CSV berisi data performa penjualan cabang.
+    Melakukan upsert ke tabel BranchSalesRecord.
+    """
+
+    def post(self, request: HttpRequest) -> JsonResponse:
+        csv_file = request.FILES.get("sales_csv")
+        if not csv_file:
+            return JsonResponse({"ok": False, "error": "File CSV tidak ditemukan."}, status=400)
+
+        try:
+            import io
+            df = pd.read_csv(io.BytesIO(csv_file.read()), dtype=str)
+            df.columns = [c.strip().lower() for c in df.columns]
+        except Exception as exc:
+            return JsonResponse({"ok": False, "error": f"Gagal membaca CSV: {exc}"}, status=400)
+
+        missing = _SALES_REQUIRED_COLS - set(df.columns)
+        if missing:
+            return JsonResponse({
+                "ok": False,
+                "error": f"Kolom berikut tidak ada di CSV: {', '.join(sorted(missing))}"
+            }, status=400)
+
+        success, errors = 0, []
+        for i, row in df.iterrows():
+            try:
+                prefix = str(row["branch_prefix"]).strip().lstrip("0") or str(row["branch_prefix"]).strip()
+                # Pertahankan format 3 digit
+                prefix = str(row["branch_prefix"]).strip().zfill(3)
+
+                def parse_pct(val):
+                    """Parse persentase: '31.59', '+31.59', '-9.89' → float."""
+                    v = str(val).strip().replace("%", "").replace(",", ".")
+                    return float(v) if v not in ("", "nan", "None", "-") else None
+
+                BranchSalesRecord.objects.update_or_create(
+                    branch_prefix=prefix,
+                    period=str(row["period"]).strip(),
+                    defaults={
+                        "branch_name": str(row["branch_name"]).strip(),
+                        "area": str(row.get("area", "")).strip() or None,
+                        "nsa": str(row["nsa"]).strip() if str(row["nsa"]).strip() not in ("", "nan") else None,
+                        "bp": parse_pct(row["bp"]),
+                        "mscp": parse_pct(row["mscp"]),
+                        "nl": parse_pct(row["nl"]),
+                    }
+                )
+                success += 1
+            except Exception as exc:
+                errors.append(f"Baris {i + 2}: {exc}")
+
+        return JsonResponse({
+            "ok": True,
+            "success": success,
+            "errors": errors,
+            "message": f"{success} data berhasil disimpan." + (f" {len(errors)} baris gagal." if errors else "")
+        })
+
+
+class DownloadSalesTemplateView(View):
+    """GET /download-sales-template/ — Unduh template CSV kosong."""
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        import csv as csv_module
+        import io
+
+        output = io.StringIO()
+        writer = csv_module.writer(output)
+        writer.writerow(["branch_prefix", "branch_name", "area", "period", "nsa", "bp", "mscp", "nl"])
+        # Contoh baris
+        writer.writerow(["101", "JAKARTA PUSAT 2", "JABODETABEK", "2026-06", "333.115.001.111", "31.59", "89.36", "-9.89"])
+        writer.writerow(["102", "SERANG", "JABODETABEK", "2026-06", "150.000.000", "-5.20", "75.00", "12.50"])
+
+        response = HttpResponse(output.getvalue(), content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = 'attachment; filename="template_sales_performance.csv"'
+        return response

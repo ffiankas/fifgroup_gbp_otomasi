@@ -4,7 +4,7 @@
 {% block breadcrumb %}
 <span class="text-[#8C8AA0] text-sm">Dashboard</span>
 <span class="text-[#8C8AA0] mx-2 text-sm">/</span>
-<span class="text-[#1F1B3F] font-medium text-sm">Download Report</span>
+<span class="text-[#0F172A] font-medium text-sm">Download Report</span>
 {% endblock %}
 
 {% block content %}
@@ -12,7 +12,7 @@
 
   <!-- Header -->
   <div>
-    <h1 class="text-2xl font-display font-bold text-[#1F1B3F] tracking-tight">Download Report</h1>
+    <h1 class="text-2xl font-display font-bold text-[#0F172A] tracking-tight">Download Report</h1>
     <p class="text-sm text-[#8C8AA0] mt-1">Export data rekonsiliasi verifikasi dalam format CSV atau Excel</p>
   </div>
 
@@ -29,7 +29,7 @@
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
-          <tr class="border-b border-[#F4F3FB]">
+          <tr class="border-b border-[#EFF6FF]">
             <th class="text-left py-3 px-3 text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Tanggal</th>
             <th class="text-left py-3 px-3 text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Sumber</th>
             <th class="text-center py-3 px-3 text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Total</th>
@@ -38,17 +38,17 @@
             <th class="text-right py-3 px-3 text-[10px] font-semibold text-[#8C8AA0] uppercase tracking-wider">Aksi</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-[#F4F3FB]">
+        <tbody class="divide-y divide-[#EFF6FF]">
           {% for job in recon_jobs %}
-          <tr class="hover:bg-[rgba(108,93,211,0.04)] transition-colors">
-            <td class="py-3.5 px-3 text-[#1F1B3F] font-medium text-sm">
+          <tr class="hover:bg-[rgba(15,60,140,0.04)] transition-colors">
+            <td class="py-3.5 px-3 text-[#0F172A] font-medium text-sm">
               {{ job.created_at|date:"d M Y H:i" }}
             </td>
             <td class="py-3.5 px-3 text-[#8C8AA0] text-xs max-w-[200px] truncate">
               {{ job.source_label|default:"—" }}
             </td>
             <td class="py-3.5 px-3 text-center">
-              <span class="font-semibold text-[#1F1B3F] font-display tabular-nums">{{ job.total_master|default:0 }}</span>
+              <span class="font-semibold text-[#0F172A] font-display tabular-nums">{{ job.total_master|default:0 }}</span>
             </td>
             <td class="py-3.5 px-3 text-center">
               {% if job.updated_count > 0 %}
@@ -62,7 +62,7 @@
             </td>
             <td class="py-3.5 px-3 text-right">
               <a href="{% url 'gbp:download_recon_detail' job.id %}"
-                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-indigo-700 transition-all hover:-translate-y-px">
+                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-blue-700 transition-all hover:-translate-y-px">
                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                </svg>
@@ -76,12 +76,12 @@
     </div>
     {% else %}
     <div class="flex flex-col items-center justify-center py-16 text-center">
-      <div class="w-14 h-14 rounded-2xl bg-[#F4F3FB] flex items-center justify-center mb-4">
+      <div class="w-14 h-14 rounded-2xl bg-[#EFF6FF] flex items-center justify-center mb-4">
         <svg class="w-7 h-7 text-[#8C8AA0]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
       </div>
-      <p class="text-[#1F1B3F] text-sm font-semibold">Belum Ada Riwayat Rekonsiliasi</p>
+      <p class="text-[#0F172A] text-sm font-semibold">Belum Ada Riwayat Rekonsiliasi</p>
       <p class="text-[#8C8AA0] text-xs mt-1">Jalankan rekonsiliasi di menu <strong>Update Status</strong> terlebih dahulu.</p>
       <a href="{% url 'gbp:update_status' %}" class="btn-primary mt-5">
         Ke Update Status

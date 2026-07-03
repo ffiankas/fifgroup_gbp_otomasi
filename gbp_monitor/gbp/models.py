@@ -216,6 +216,17 @@ class MasterLocation(models.Model):
         max_length=50, blank=True, null=True,
         verbose_name="Status Verifikasi", db_index=True,
     )
+    # Koordinat manual — digunakan sebagai fallback jika GBP API tidak punya koordinat
+    latitude = models.FloatField(
+        null=True, blank=True,
+        verbose_name="Latitude (Manual)",
+        help_text="Isi jika lokasi tidak terdeteksi oleh GBP API. Format: -6.200000",
+    )
+    longitude = models.FloatField(
+        null=True, blank=True,
+        verbose_name="Longitude (Manual)",
+        help_text="Isi jika lokasi tidak terdeteksi oleh GBP API. Format: 106.816666",
+    )
     last_synced_at = models.DateTimeField(
         null=True, blank=True,
         verbose_name="Terakhir Disinkronkan",
@@ -346,3 +357,96 @@ class ReconciliationResult(models.Model):
 
     def __str__(self) -> str:
         return f"{self.identifier_value} — {self.process_status}"
+
+
+# ══════════════════════════════════════════════════════════════════════
+# BRANCH SALES RECORD
+# ══════════════════════════════════════════════════════════════════════
+
+class BranchSalesRecord(models.Model):
+    """
+    Data performa penjualan per cabang per periode.
+    Diupload via CSV dari halaman Update Data.
+    Ditampilkan di popup peta Branch Coverage.
+    """
+
+    branch_prefix = models.CharField(
+        max_length=10,
+        verbose_name="Prefix Cabang (3 digit)",
+        db_index=True,
+        help_text="3 digit pertama store code cabang. Contoh: 101",
+    )
+    branch_name = models.CharField(
+        max_length=255,
+        verbose_name="Nama Cabang",
+    )
+    area = models.CharField(
+        max_length=150,
+        blank=True, null=True,
+        verbose_name="Area",
+    )
+    period = models.CharField(
+        max_length=7,
+        verbose_name="Periode (YYYY-MM)",
+        db_index=True,
+        help_text="Format: YYYY-MM. Contoh: 2026-06",
+    )
+    nsa = models.CharField(
+        max_length=100,
+        blank=True, null=True,
+        verbose_name="NSA",
+        help_text="Nominal Sales Achievement. Contoh: 333.115.001.111",
+    )
+    bp = models.FloatField(
+        null=True, blank=True,
+        verbose_name="BP (%)",
+        help_text="Bisa positif atau negatif. Contoh: 31.59 atau -9.89",
+    )
+    mscp = models.FloatField(
+        null=True, blank=True,
+        verbose_name="MSCP (%)",
+        help_text="Bisa positif atau negatif.",
+    )
+    nl = models.FloatField(
+        null=True, blank=True,
+        verbose_name="NL (%)",
+        help_text="Bisa positif atau negatif.",
+    )
+    uploaded_at = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diupload")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Branch Sales Record"
+        verbose_name_plural = "Branch Sales Records"
+        db_table = "gbp_branchsalesrecord"
+        # Satu record per cabang per periode (upsert)
+        unique_together = [("branch_prefix", "period")]
+        ordering = ["-period", "branch_prefix"]
+        indexes = [
+            models.Index(fields=["branch_prefix", "period"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.branch_name} ({self.branch_prefix}) — {self.period}"
+
+    @property
+    def bp_display(self) -> str:
+        """Format tampilan BP dengan tanda + atau -."""
+        if self.bp is None:
+            return "—"
+        sign = "+" if self.bp >= 0 else ""
+        return f"{sign}{self.bp:.2f}%"
+
+    @property
+    def mscp_display(self) -> str:
+        if self.mscp is None:
+            return "—"
+        sign = "+" if self.mscp >= 0 else ""
+        return f"{sign}{self.mscp:.2f}%"
+
+    @property
+    def nl_display(self) -> str:
+        if self.nl is None:
+            return "—"
+        sign = "+" if self.nl >= 0 else ""
+        return f"{sign}{self.nl:.2f}%"
