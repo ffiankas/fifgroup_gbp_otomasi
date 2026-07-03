@@ -1,7 +1,7 @@
 import os
 import re
 
-dir_path = r'c:\Users\Asus\Desktop\GBP AUTOMATION_2\fifgroup_gbp_otomasi\gbp_monitor\gbp\templates\gbp'
+dir_path = r'./gbp/templates/gbp'
 
 replacements = {
     '#6C5DD3': '#0F3C8C',

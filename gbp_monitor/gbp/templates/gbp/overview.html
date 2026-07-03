@@ -1,15 +1,15 @@
 {% extends "gbp/base.html" %} {% block title %}Overview{% endblock %} {% block breadcrumb %}
-<span class="text-[#1F1B3F] font-medium">Dashboard Overview</span>
+<span class="text-[#0F172A] font-medium">Dashboard Overview</span>
 {% endblock %} {% block content %} {% if no_data %}
 <!-- ── Empty State ─────────────────────────────────────── -->
 <div class="flex flex-col items-center justify-center py-24 text-center">
-  <div class="w-20 h-20 rounded-3xl bg-[#F4F3FB] flex items-center justify-center mb-5">
+  <div class="w-20 h-20 rounded-3xl bg-[#EFF6FF] flex items-center justify-center mb-5">
     <svg class="w-10 h-10 text-[#8C8AA0]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
       <path stroke-linecap="round" stroke-linejoin="round"
         d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
     </svg>
   </div>
-  <h2 class="text-xl font-semibold text-[#1F1B3F] mb-2">Belum Ada Data</h2>
+  <h2 class="text-xl font-semibold text-[#0F172A] mb-2">Belum Ada Data</h2>
   <p class="text-[#8C8AA0] text-sm max-w-sm mb-6">Belum ada data GBP. Klik <strong>Fetch Sekarang</strong> di sidebar
     atau jalankan perintah fetch.</p>
 </div>
@@ -58,7 +58,7 @@
           <div id="distChart" class="w-full h-full"></div>
           <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div class="text-center bg-white rounded-full flex flex-col items-center justify-center"
-              style="width: 66px; height: 66px; box-shadow: 0 2px 12px rgba(108, 93, 211, 0.12)">
+              style="width: 66px; height: 66px; box-shadow: 0 2px 12px rgba(15, 60, 140, 0.12)">
               <span class="font-display font-bold text-primary leading-tight"
                 style="font-size: 13px">{{summary.total|default:0 }}</span>
               <span style="font-size: 7px" class="font-bold text-[#8C8AA0] uppercase tracking-widest">Total</span>
@@ -70,33 +70,33 @@
         <div class="flex-1 space-y-2 min-w-0">
           <div class="flex items-center gap-2 group">
             <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 group-hover:scale-125 transition-transform"
-              style="background-color: #6c5dd3"></div>
+              style="background-color: #0F3C8C"></div>
             <span class="flex-1 text-[11px] text-[#8C8AA0] font-medium truncate">Verified</span>
-            <span class="text-xs font-display font-bold text-[#1F1B3F] tabular-nums">{{summary.verified|default:0}}</span>
+            <span class="text-xs font-display font-bold text-[#0F172A] tabular-nums">{{summary.verified|default:0}}</span>
           </div>
           <div class="flex items-center gap-2 group">
             <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 group-hover:scale-125 transition-transform"
-              style="background-color: #1fb6b6"></div>
+              style="background-color: #00AEEF"></div>
             <span class="flex-1 text-[11px] text-[#8C8AA0] font-medium truncate">Duplicate</span>
-            <span class="text-xs font-display font-bold text-[#1F1B3F] tabular-nums">{{summary.duplicate|default:0}}</span>
+            <span class="text-xs font-display font-bold text-[#0F172A] tabular-nums">{{summary.duplicate|default:0}}</span>
           </div>
           <div class="flex items-center gap-2 group">
             <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 group-hover:scale-125 transition-transform"
               style="background-color: #3da9fc"></div>
             <span class="flex-1 text-[11px] text-[#8C8AA0] font-medium truncate">Suspended</span>
-            <span class="text-xs font-display font-bold text-[#1F1B3F] tabular-nums">{{summary.suspended|default:0}}</span>
+            <span class="text-xs font-display font-bold text-[#0F172A] tabular-nums">{{summary.suspended|default:0}}</span>
           </div>
           <div class="flex items-center gap-2 group">
             <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 group-hover:scale-125 transition-transform"
               style="background-color: #d4537e"></div>
             <span class="flex-1 text-[11px] text-[#8C8AA0] font-medium truncate">Need Reverification</span>
-            <span class="text-xs font-display font-bold text-[#1F1B3F] tabular-nums">{{summary.need_verification|default:0}}</span>
+            <span class="text-xs font-display font-bold text-[#0F172A] tabular-nums">{{summary.need_verification|default:0}}</span>
           </div>
           <div class="flex items-center gap-2 group">
             <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 group-hover:scale-125 transition-transform"
               style="background-color: #8c8aa0"></div>
             <span class="flex-1 text-[11px] text-[#8C8AA0] font-medium truncate">Unverified</span>
-            <span class="text-xs font-display font-bold text-[#1F1B3F] tabular-nums">{{summary.unverified|default:0}}</span>
+            <span class="text-xs font-display font-bold text-[#0F172A] tabular-nums">{{summary.unverified|default:0}}</span>
           </div>
         </div>
       </div>
@@ -130,7 +130,7 @@
           <div class="flex-1 space-y-2.5 min-w-0">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-1.5 min-w-0">
-                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: #6c5dd3"></span>
+                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: #0F3C8C"></span>
                 <span class="text-[11px] text-[#8C8AA0] font-medium truncate">Terverifikasi</span>
               </div>
               <span class="text-xs font-bold font-display text-primary tabular-nums flex-shrink-0">{{gauge_verified}}</span>
@@ -148,7 +148,7 @@
         <!-- TOTAL LOKASI centered in card -->
         <div class="flex items-center justify-center gap-2 -mt-12 relative z-10">
           <span class="text-[12px] font-semibold text-[#8C8AA0] uppercase tracking-wide">Total Lokasi</span>
-          <span class="text-xl font-black font-display text-[#1F1B3F] tabular-nums">{{gauge_total }}</span>
+          <span class="text-xl font-black font-display text-[#0F172A] tabular-nums">{{gauge_total }}</span>
         </div>
       </div>
     </div>
@@ -163,7 +163,7 @@
           {% endif %}
         </div>
         <span
-          class="w-6 h-6 rounded-full bg-[#F4F3FB] border border-indigo-100 flex items-center justify-center text-xs text-[#8C8AA0] cursor-help transition-colors hover:bg-primary hover:text-white"
+          class="w-6 h-6 rounded-full bg-[#EFF6FF] border border-blue-100 flex items-center justify-center text-xs text-[#8C8AA0] cursor-help transition-colors hover:bg-primary hover:text-white"
           title="Grafik garis yang menunjukkan pertumbuhan lokasi Verified dibandingkan Total Network selama 30 hari terakhir.">?</span>
       </div>
       <!-- Chart fills all remaining vertical space -->
@@ -185,7 +185,7 @@
       </div>
       <div class="flex-1 min-h-0 overflow-auto">
         <table class="w-full text-sm text-left">
-          <thead class="bg-[#F4F3FB] border-y border-indigo-50">
+          <thead class="bg-[#EFF6FF] border-y border-blue-50">
             <tr>
               <th class="px-3 py-2.5 font-semibold text-[#8C8AA0] text-[10px] uppercase tracking-wider w-10">No</th>
               <th class="px-3 py-2.5 font-semibold text-[#8C8AA0] text-[10px] uppercase tracking-wider">Area</th>
@@ -194,11 +194,11 @@
               <th class="px-3 py-2.5 font-semibold text-[#8C8AA0] text-[10px] uppercase tracking-wider w-28">Rate</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-[#F4F3FB]">
+          <tbody class="divide-y divide-[#EFF6FF]">
             {% for area in top_areas|slice:":5" %}
-            <tr class="hover:bg-indigo-50/30 transition-colors">
+            <tr class="hover:bg-blue-50/30 transition-colors">
               <td class="px-3 py-3 text-[#8C8AA0] font-mono text-[10px]">{{forloop.counter }}</td>
-              <td class="px-3 py-3 font-medium text-[#1F1B3F] text-xs">{{area.area }}</td>
+              <td class="px-3 py-3 font-medium text-[#0F172A] text-xs">{{area.area }}</td>
               <td class="px-3 py-3 text-right text-primary font-bold tabular-nums text-xs">{{area.verified }}</td>
               <td class="px-3 py-3">
                 <div class="flex items-center gap-2">
@@ -225,7 +225,7 @@
       </div>
       <div class="flex-1 min-h-0 overflow-auto">
         <table class="w-full text-sm text-left">
-          <thead class="bg-[#F4F3FB] border-y border-indigo-50">
+          <thead class="bg-[#EFF6FF] border-y border-blue-50">
             <tr>
               <th class="px-3 py-2.5 font-semibold text-[#8C8AA0] text-[10px] uppercase tracking-wider w-10">No</th>
               <th class="px-3 py-2.5 font-semibold text-[#8C8AA0] text-[10px] uppercase tracking-wider">Area</th>
@@ -234,11 +234,11 @@
               <th class="px-3 py-2.5 font-semibold text-[#8C8AA0] text-[10px] uppercase tracking-wider w-28">Rate</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-[#F4F3FB]">
+          <tbody class="divide-y divide-[#EFF6FF]">
             {% for area in bottom_areas|slice:":5" %}
             <tr class="hover:bg-pink-50/30 transition-colors">
               <td class="px-3 py-3 text-[#8C8AA0] font-mono text-[10px]">{{forloop.counter }}</td>
-              <td class="px-3 py-3 font-medium text-[#1F1B3F] text-xs">{{area.area }}</td>
+              <td class="px-3 py-3 font-medium text-[#0F172A] text-xs">{{area.area }}</td>
               <td class="px-3 py-3 text-right text-[#D4537E] font-bold tabular-nums text-xs">{{area.verified }}</td>
               <td class="px-3 py-3">
                 <div class="flex items-center gap-2">
@@ -265,7 +265,7 @@
       </div>
       <div class="flex-1 min-h-0 overflow-auto">
         <table class="w-full text-sm text-left">
-          <thead class="bg-[#F4F3FB] border-y border-indigo-50">
+          <thead class="bg-[#EFF6FF] border-y border-blue-50">
             <tr>
               <th class="px-3 py-3 font-semibold text-[#8C8AA0] text-[10px] uppercase tracking-wider">Network</th>
               <th class="px-3 py-3 font-semibold text-[#8C8AA0] text-[10px] uppercase tracking-wider text-right w-16">
@@ -278,12 +278,12 @@
                 Rate</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-[#F4F3FB]">
+          <tbody class="divide-y divide-[#EFF6FF]">
             {% for net in status_by_network %}
-            <tr class="hover:bg-indigo-50/30 transition-colors">
-              <td class="px-3 py-3.5 font-bold text-[#1F1B3F] text-xs">{{net.network }}</td>
+            <tr class="hover:bg-blue-50/30 transition-colors">
+              <td class="px-3 py-3.5 font-bold text-[#0F172A] text-xs">{{net.network }}</td>
               <td class="px-3 py-3.5 text-right text-[#8C8AA0] tabular-nums text-xs font-medium">{{net.total }}</td>
-              <td class="px-3 py-3.5 text-right text-primary font-bold tabular-nums text-xs bg-indigo-50/40">
+              <td class="px-3 py-3.5 text-right text-primary font-bold tabular-nums text-xs bg-blue-50/40">
                 {{net.verified }}</td>
               <td class="px-3 py-3.5 text-right text-[#D4537E] font-bold tabular-nums text-xs bg-pink-50/30">
                 {{net.suspended }}</td>
@@ -298,7 +298,7 @@
   </div>
 
   <!-- Footer area -->
-  <div class="flex justify-between items-center pt-6 border-t border-indigo-100 text-xs text-[#8C8AA0]">
+  <div class="flex justify-between items-center pt-6 border-t border-blue-100 text-xs text-[#8C8AA0]">
     <div>GBP Monitor FIFGROUP</div>
     <a href="#" class="flex items-center gap-1 hover:text-primary transition-colors">
       Data Store
@@ -315,12 +315,12 @@
 {% endif %} {% endblock %} {% block extra_scripts %}
 <script>
   // ── Palette ────────────────────────────────────────────────────
-  var PURPLE = '#6C5DD3';
-  var TEAL = '#1FB6B6';
+  var PURPLE = '#0F3C8C';
+  var TEAL = '#00AEEF';
   var SKY = '#3DA9FC';
   var PINK = '#D4537E';
   var LAVND = '#8C8AA0';
-  var DARK = '#1F1B3F';
+  var DARK = '#0F172A';
 
   // ── 1. Status Distribution Chart (ApexCharts Donut) ────────────
   var distEl = document.getElementById('distChart');
@@ -447,7 +447,7 @@
           min: 0
         },
         grid: {
-          borderColor: 'rgba(108,93,211,0.06)',
+          borderColor: 'rgba(15,60,140,0.06)',
           strokeDashArray: 4,
           xaxis: { lines: { show: false } },
           yaxis: { lines: { show: true } }
